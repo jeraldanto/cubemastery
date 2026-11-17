@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Master the Cube - Student Portal</title>
+    
+    <!-- Favicon matching the green cube -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><path fill='%2310b981' d='M239.1 6.3l-208 78c-18.7 7-31.1 25-31.1 45v225.1c0 18.2 10.3 34.8 26.5 42.9l208 104c13.5 6.8 29.4 6.8 42.9 0l208-104c16.3-8.1 26.5-24.8 26.5-42.9V129.3c0-20-12.4-37.9-31.1-44.9l-208-78C262 2.2 250 2.2 239.1 6.3zM256 68.4l192 72v1.1l-192 78-192-78v-1.1l192-72zm32 356V275.5l160-65v133.9l-160 76.2z'/></svg>" type="image/svg+xml">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/TrackballControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <!-- Razorpay & Supabase Client -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #020617; color: #f8fafc; }
+        
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+        #cube-container { touch-action: none; }
+        
+        .card-edge-0 { border-top: 4px solid #ffffff !important; }
+        .card-edge-1 { border-top: 4px solid #10b981 !important; }
+        .card-edge-2 { border-top: 4px solid #ef4444 !important; }
+        .card-edge-3 { border-top: 4px solid #3b82f6 !important; }
+        .card-edge-4 { border-top: 4px solid #f97316 !important; }
+        .card-edge-5 { border-top: 4px solid #eab308 !important; }
+        .card-edge-6 { border-top: 4px solid #10b981 !important; }
+    </style>
+</head>
+<body class="h-screen overflow-hidden relative">
+
+    <!-- VIEW: AUTHENTICATION -->
+    <div id="view-auth" class="absolute inset-0 flex bg-slate-950 z-50">
+        <div class="hidden lg:flex lg:w-1/2 bg-[#0b1121] relative items-center justify-center overflow-hidden border-r border-slate-800/50">
+            <div class="absolute inset-0 opacity-30" style="background-image: linear-gradient(#1e293b 1px, transparent 1px), linear-gradient(90deg, #1e293b 1px, transparent 1px); background-size: 40px 40px;"></div>
+            
+            <div class="relative z-10 text-center text-white px-12 max-w-lg mt-[-50px]">
+                <i class="fa-solid fa-cube text-emerald-500 text-6xl mb-6 drop-shadow-[0_0_20px_rgba(16,185,129,0.5)]"></i>
+                <h2 class="text-5xl font-extrabold mb-6 tracking-tight">Master the Cube.</h2>
+                <p class="text-lg text-slate-400 leading-relaxed">Your 7-day journey to solving the Rubik's Cube starts here. Sign in to access the beginner method curriculum.</p>
+            </div>
+
+            <div class="absolute bottom-16 left-16 w-20 h-20 bg-emerald-600 rounded-2xl transform rotate-12 shadow-[0_10px_40px_rgba(16,185,129,0.3)] opacity-90 border-4 border-[#0b1121]"></div>
+            <div class="absolute top-32 right-24 w-16 h-16 bg-blue-600 rounded-2xl transform -rotate-12 shadow-[0_10px_40px_rgba(37,99,235,0.3)] opacity-90 border-4 border-[#0b1121]"></div>
+            <div class="absolute bottom-1/3 right-12 w-28 h-28 bg-rose-600 rounded-2xl transform rotate-45 shadow-[0_10px_40px_rgba(225,29,72,0.3)] opacity-90 border-4 border-[#0b1121]"></div>
+        </div>
+
+        <div class="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 bg-[#0b1121] overflow-y-auto">
+            <div class="w-full max-w-md my-auto">
+                <div class="lg:hidden text-center mb-8">
+                    <i class="fa-solid fa-cube text-emerald-500 text-5xl mb-3 drop-shadow-[0_0_15px_rgba(16,185,129,0.5)]"></i>
+                    <h2 class="text-3xl font-extrabold text-white tracking-tight">CubeMastery Pro</h2>
+                </div>
+
+                <div class="bg-slate-900 rounded-2xl shadow-2xl overflow-hidden border border-slate-800">
+                    <div class="flex border-b border-slate-800">
+                        <button id="tab-login" class="flex-1 py-4 text-sm font-bold text-emerald-500 border-b-2 border-emerald-500 transition-colors">LOG IN</button>
+                        <button id="tab-register" class="flex-1 py-4 text-sm font-bold text-slate-500 hover:text-slate-300 border-b-2 border-transparent transition-colors">CREATE ACCOUNT</button>
+                    </div>
+
+                    <div class="p-8">
+                        <!-- Alert Box (Hidden by default) -->
+                        <div id="auth-alert" class="hidden mb-6 p-4 rounded-lg text-sm font-semibold text-center border"></div>
+
+                        <!-- Login Form -->
+                        <form id="login-form" class="space-y-5" novalidate>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-400 mb-1">Email Address</label>
+                                <input type="email" id="login-email" name="email" autocomplete="email" class="w-full px-4 py-3 rounded-lg bg-slate-950 border border-slate-700 text-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all" placeholder="you@email.com" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-400 mb-1">Password</label>
+                                <div class="relative">
+                                    <input type="password" id="login-password" name="password" autocomplete="current-password" class="w-full px-4 py-3 rounded-lg bg-slate-950 border border-slate-700 text-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all pr-12" placeholder="Your password" required>
+                                    <button type="button" class="toggle-password absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-500 hover:text-slate-300">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <button type="submit" id="btn-login-submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg transition-colors shadow-lg shadow-emerald-900/50 flex justify-center items-center gap-2">
+                                <span>Sign In to Class</span>
+                            </button>
+                        </form>
+
+                        <!-- Register Form -->
+                        <form id="register-form" class="hidden space-y-4" novalidate>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-400 mb-1">Full Name</label>
+                                <input type="text" id="register-name" name="name" autocomplete="name" class="w-full px-4 py-3 rounded-lg bg-slate-950 border border-slate-700 text-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all" placeholder="John Doe" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-400 mb-1">Phone Number</label>
+                                <div class="flex">
+                                    <span class="inline-flex items-center px-4 rounded-l-lg border border-r-0 border-slate-700 bg-slate-800 text-slate-400 font-semibold sm:text-sm">
+                                        +91
+                                    </span>
+                                    <input type="tel" id="register-phone" name="phone" autocomplete="tel" pattern="[0-9]{10}" class="flex-1 min-w-0 block w-full px-4 py-3 rounded-none rounded-r-lg bg-slate-950 border border-slate-700 text-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all" placeholder="9876543210" required>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-400 mb-1">Email Address</label>
+                                <input type="email" id="register-email" name="email" autocomplete="email" class="w-full px-4 py-3 rounded-lg bg-slate-950 border border-slate-700 text-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all" placeholder="you@email.com" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-400 mb-1">Password</label>
+                                <div class="relative">
+                                    <input type="password" id="register-password" name="password" autocomplete="new-password" class="w-full px-4 py-3 rounded-lg bg-slate-950 border border-slate-700 text-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all pr-12" placeholder="Choose a password" required>
+                                    <button type="button" class="toggle-password absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-500 hover:text-slate-300">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <button type="submit" id="btn-register-submit" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 mt-2 rounded-lg transition-colors border border-slate-600 flex justify-center items-center gap-2">
+                                <span>Create Account</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW: STORE PAYWALL -->
+    <div id="view-home" class="hidden absolute inset-0 bg-[#0b1121] z-40 overflow-y-auto">
+        <div class="max-w-6xl mx-auto px-6 py-12 md:py-24">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h2 class="text-3xl font-bold text-white mb-8">What's included?</h2>
+                    <div class="space-y-8">
+                        <div class="flex gap-4">
+                            <div class="w-12 h-12 bg-slate-800 rounded-xl flex items-center justify-center shrink-0 border border-slate-700">
+                                <i class="fa-solid fa-cube text-emerald-500 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-white mb-1">Interactive 3D Engine</h3>
+                                <p class="text-slate-400 text-sm leading-relaxed">Practice finger tricks and rotate a virtual cube directly in your browser. No physical cube required to start learning.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex gap-4">
+                            <div class="w-12 h-12 bg-slate-800 rounded-xl flex items-center justify-center shrink-0 border border-slate-700">
+                                <i class="fa-solid fa-play text-emerald-500 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-white mb-1">Animated Algorithms</h3>
+                                <p class="text-slate-400 text-sm leading-relaxed">Click "Play" on any algorithm to watch the 3D cube execute the moves perfectly. See exactly how it's done.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex gap-4">
+                            <div class="w-12 h-12 bg-slate-800 rounded-xl flex items-center justify-center shrink-0 border border-slate-700">
+                                <i class="fa-solid fa-route text-emerald-500 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-white mb-1">7-Day Step-by-Step Path</h3>
+                                <p class="text-slate-400 text-sm leading-relaxed">We broke down the beginner method into 7 digestible stages. From Basic Notations to the final corners.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-center lg:justify-end">
+                    <div class="bg-slate-900 rounded-3xl p-8 md:p-10 border border-slate-800 shadow-2xl w-full max-w-md">
+                        <h3 class="text-2xl font-bold text-white mb-2">7-Day Access Pass</h3>
+                        <p class="text-slate-400 mb-6 text-sm">Everything you need to solve your first Rubik's Cube.</p>
+                        
+                        <div class="flex items-baseline gap-2 mb-6 border-b border-slate-800 pb-6">
+                            <span class="text-5xl font-extrabold text-white">₹300</span>
+                            <span class="text-slate-500 text-sm">/ one-time</span>
+                        </div>
+                        
+                        <ul class="text-left text-white space-y-3 mb-8 text-sm font-medium">
+                            <li class="flex items-center"><i class="fa-solid fa-check text-emerald-500 mr-3 text-lg"></i> Full Curriculum Access</li>
+                            <li class="flex items-center"><i class="fa-solid fa-check text-emerald-500 mr-3 text-lg"></i> Unlimited 3D Simulator Usage</li>
+                            <li class="flex items-center"><i class="fa-solid fa-check text-emerald-500 mr-3 text-lg"></i> Cloud Saved Progress</li>
+                        </ul>
+                        
+                        <button id="btn-unlock-course" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-emerald-900/50 text-lg mb-4">
+                            Unlock Course Now
+                        </button>
+
+                        <!-- Promo Code Section -->
+                        <div class="mt-4 pt-4 border-t border-slate-800">
+                            <div class="flex gap-2">
+                                <input type="text" id="promo-input" placeholder="Enter promo code" class="flex-1 px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white text-sm outline-none focus:border-emerald-500">
+                                <button id="btn-apply-promo" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-lg text-sm font-bold border border-slate-700 transition-colors">Apply</button>
+                            </div>
+                            <p id="promo-msg" class="text-xs mt-2 hidden font-semibold"></p>
+                        </div>
+
+                        <p class="text-center text-xs text-slate-500 mt-4"><i class="fa-solid fa-lock mr-1"></i> Secured via Razorpay & SQLite</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Lore & Info Section -->
+            <div class="mt-24 pt-12 border-t border-slate-800 text-center max-w-3xl mx-auto pb-12">
+                <i class="fa-solid fa-earth-americas text-slate-600 text-4xl mb-4"></i>
+                <h3 class="text-xl font-bold text-white mb-4">The Global Phenomenon</h3>
+                <p class="text-slate-400 text-sm leading-relaxed mb-6">Invented in 1974 by Hungarian sculptor and professor of architecture Ernő Rubik, the Rubik's Cube was originally called the "Magic Cube." It was designed as a teaching tool to help his students understand 3D geometry. Today, with over 350 million units sold, it remains the world's best-selling puzzle toy.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+                    <div class="bg-slate-900 p-6 rounded-xl border border-slate-800">
+                        <i class="fa-solid fa-brain text-emerald-500 mb-3 text-xl"></i>
+                        <h4 class="text-white font-bold text-sm mb-2">Cognitive Benefits</h4>
+                        <p class="text-xs text-slate-400">Improves spatial awareness, memory capacity, and hand-eye coordination.</p>
+                    </div>
+                    <div class="bg-slate-900 p-6 rounded-xl border border-slate-800">
+                        <i class="fa-solid fa-calculator text-emerald-500 mb-3 text-xl"></i>
+                        <h4 class="text-white font-bold text-sm mb-2">Mathematical Marvel</h4>
+                        <p class="text-xs text-slate-400">There are 43,252,003,274,489,856,000 possible permutations of the cube.</p>
+                    </div>
+                    <div class="bg-slate-900 p-6 rounded-xl border border-slate-800">
+                        <i class="fa-solid fa-stopwatch text-emerald-500 mb-3 text-xl"></i>
+                        <h4 class="text-white font-bold text-sm mb-2">Speedcubing</h4>
+                        <p class="text-xs text-slate-400">The current human world record for solving a 3x3 cube is under 4 seconds.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW: APP DASHBOARD -->
+    <div id="view-app" class="hidden h-full flex flex-col z-30 bg-slate-950">
+        <nav class="bg-slate-900 border-b border-slate-800 px-6 py-4 flex justify-between items-center shrink-0 shadow-md">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-cube text-emerald-500 text-2xl"></i>
+                <h1 class="text-xl font-bold text-white">CubeMastery</h1>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="hidden sm:flex items-center gap-2 bg-slate-950 py-1.5 px-4 rounded-full border border-slate-800">
+                    <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+                    <span id="nav-user-email" class="text-xs font-semibold text-slate-300">student@example.com</span>
+                </div>
+                <button id="btn-logout" class="bg-slate-800 hover:bg-rose-900/50 hover:text-rose-400 text-slate-400 border border-slate-700 hover:border-rose-800 transition-colors py-1.5 px-4 rounded-lg text-sm font-bold flex items-center gap-2" title="Log Out">
+                    <i class="fa-solid fa-right-from-bracket"></i> <span class="hidden sm:inline">Logout</span>
+                </button>
+            </div>
+        </nav>
+
+        <div class="flex-1 overflow-y-auto p-4 md:p-8">
+            <div class="max-w-6xl mx-auto space-y-8">
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800 shadow-md md:col-span-2 flex flex-col justify-center relative overflow-hidden">
+                        <div class="absolute inset-0 opacity-5" style="background-image: repeating-linear-gradient(45deg, #10b981 0, #10b981 1px, transparent 0, transparent 50%); background-size: 20px 20px;"></div>
+                        <div class="relative z-10 flex justify-between items-end mb-2">
+                            <div>
+                                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider">Course Progress</h3>
+                                <p class="text-2xl font-extrabold text-white" id="progress-text">0% Completed</p>
+                            </div>
+                            <i class="fa-solid fa-trophy text-3xl text-slate-700 transition-all duration-500" id="progress-icon"></i>
+                        </div>
+                        <div class="relative z-10 w-full bg-slate-950 rounded-full h-3 mt-4 overflow-hidden border border-slate-800">
+                            <div id="progress-bar" class="bg-emerald-500 h-3 rounded-full transition-all duration-1000 w-0 shadow-[0_0_10px_rgba(16,185,129,0.8)]"></div>
+                        </div>
+                        <button id="btn-certificate" class="hidden relative z-10 mt-6 w-full bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-emerald-900/50 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-award text-xl"></i> View Certificate of Mastery
+                        </button>
+                    </div>
+
+                    <!-- Redesigned Timer Display Card -->
+                    <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800 shadow-md flex flex-col justify-center items-center text-center relative overflow-hidden">
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 w-full text-left">Personal Best</h3>
+                        <div class="w-full bg-slate-950 rounded-xl p-4 border border-slate-800 shadow-inner relative flex justify-center items-center">
+                            <div class="absolute inset-0 bg-emerald-500/5 blur-xl rounded-xl"></div>
+                            <p class="text-4xl font-extrabold text-emerald-400 font-mono tracking-wider relative z-10 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]" id="pb-display">--:--</p>
+                        </div>
+                        <p class="text-[10px] text-slate-600 mt-4 uppercase tracking-widest font-bold">WCA Scramble Mode</p>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                        <i class="fa-solid fa-graduation-cap text-emerald-500"></i> The Beginner Method
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="lessons-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW: 3D LESSON ENGINE -->
+    <div id="view-lesson" class="hidden absolute inset-0 bg-slate-950 z-40 flex flex-col">
+        <nav class="bg-slate-900 border-b border-slate-800 px-4 md:px-6 py-4 flex justify-between items-center shrink-0">
+            <div class="flex items-center gap-4">
+                <button id="btn-back-dashboard" class="w-10 h-10 rounded-full hover:bg-slate-800 flex items-center justify-center text-slate-400 transition-colors">
+                    <i class="fa-solid fa-arrow-left text-lg"></i>
+                </button>
+                <div>
+                    <h2 class="text-xl font-bold text-white" id="lesson-title">Lesson Title</h2>
+                    <p class="text-xs text-emerald-500 font-semibold uppercase tracking-wider">Interactive 3D View (White Top / Yellow Bottom)</p>
+                </div>
+            </div>
+            <div class="flex gap-3">
+                <select id="playback-speed" class="bg-slate-800 border border-slate-700 text-slate-300 text-sm rounded-lg px-3 py-2 outline-none">
+                    <option value="2.0">0.5x Slow</option>
+                    <option value="1.0" selected>1x Normal</option>
+                    <option value="0.5">2x Fast</option>
+                </select>
+                <button id="btn-mark-complete" class="bg-slate-800 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors border border-slate-700 hover:border-emerald-500 flex items-center gap-2">
+                    <i class="fa-solid fa-check"></i> <span class="hidden sm:inline">Complete</span>
+                </button>
+            </div>
+        </nav>
+
+        <div class="flex-1 flex flex-col-reverse lg:flex-row overflow-hidden">
+            <div class="w-full lg:w-1/3 h-1/2 lg:h-full bg-slate-900 border-r border-slate-800 overflow-y-auto shrink-0 relative z-20 shadow-[0_-10px_20px_rgba(0,0,0,0.3)] lg:shadow-none">
+                <div class="p-6 md:p-8">
+                    <h3 class="text-2xl font-extrabold text-white mb-2" id="alg-title">Algorithms</h3>
+                    <p class="text-slate-400 leading-relaxed mb-8" id="alg-desc">Instructions will appear here.</p>
+                    <div id="alg-list" class="space-y-4"></div>
+
+                    <div class="mt-8 pt-6 border-t border-slate-800 flex flex-col gap-3">
+                        <div class="bg-slate-950 p-3 rounded-lg border border-slate-800">
+                            <div class="text-[10px] text-slate-500 uppercase tracking-wider mb-1 font-bold">Current Scramble</div>
+                            <div id="scramble-text" class="font-mono text-xs text-emerald-400 break-words">R' U2 F R U' R'</div>
+                        </div>
+                        <button id="btn-scramble" class="w-full bg-slate-800 hover:bg-slate-700 text-emerald-400 px-4 py-3 rounded-lg text-sm font-bold border border-slate-700 transition-colors">
+                            <i class="fa-solid fa-shuffle mr-2"></i>WCA Scramble
+                        </button>
+                        <button id="btn-reset-cube" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-3 rounded-lg text-sm font-bold border border-slate-700 transition-colors">
+                            <i class="fa-solid fa-rotate-left mr-2"></i>Reset Cube
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="w-full lg:flex-1 h-1/2 lg:h-full relative overflow-hidden bg-[#020617]">
+                <div id="cube-container" class="w-full h-full cursor-grab active:cursor-grabbing"></div>
+                
+                <div class="absolute top-6 left-1/2 transform -translate-x-1/2 text-center z-10 pointer-events-none">
+                    <div id="timer-display" class="text-5xl font-mono font-bold text-white/30 drop-shadow-lg transition-colors pointer-events-auto cursor-pointer select-none">0.00</div>
+                    <div id="timer-instruction" class="text-xs font-bold text-slate-500 mt-1 transition-opacity uppercase tracking-wider">Spacebar / Tap to start timer</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT & SUPABASE INTEGRATION -->
+    <script>
+        // --- 1. SQL API INTEGRATION ---
+        const API_URL = window.location.origin.startsWith('file:')
+            ? 'http://localhost:5000/api'
+            : (window.location.origin + '/api');
+        
+        function getAuthHeaders() {
+            const token = localStorage.getItem('token');
+            return {
+                'Content-Type': 'application/json',
+                'Authorization': token ? 'Bearer ' + token : ''
+            };
+        }
+
+
+        const DRAG_SENSITIVITY = 15;
+        const SNAP_SPEED = 200;     
+        
+        const views = {
+            auth: document.getElementById('view-auth'),
+            home: document.getElementById('view-home'),
+            app: document.getElementById('view-app'),
+            lesson: document.getElementById('view-lesson')
+        };
+
+        let cubeInitialized = false;
+        let scene, camera, renderer, controls, cubeGroup;
+        const spacing = 1.0; 
+        let isAnimating = false; 
+        let isPlayingAlg = false;
+        let isScrambledState = false;
+
+        let currentLessonId = null;
+        let completedLessons = new Set();
+        let personalBest = null; 
+        let isUserPaid = false;
+        let currentUser = null;
+        let userProfile = null;
+        
+        let timerState = 'idle'; 
+        let timerStart = 0;
+        let timerInterval;
+        let timerDisplay = document.getElementById('timer-display');
+        let timerInstruction = document.getElementById('timer-instruction');
+        let cubeSynth = null;
+
+        // --- AUTH UI HELPERS ---
+        const authAlert = document.getElementById('auth-alert');
+        function showAuthAlert(message, isSuccess = false) {
+            authAlert.textContent = message;
+            authAlert.classList.remove('hidden', 'bg-rose-900/50', 'text-rose-400', 'border-rose-800', 'bg-emerald-900/50', 'text-emerald-400', 'border-emerald-800');
+            
+            if (isSuccess) {
+                authAlert.classList.add('bg-emerald-900/50', 'text-emerald-400', 'border-emerald-800');
+            } else {
+                authAlert.classList.add('bg-rose-900/50', 'text-rose-400', 'border-rose-800');
+            }
+        }
+
+        // Password visibility toggles
+        document.querySelectorAll('.toggle-password').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const input = this.previousElementSibling;
+                const icon = this.querySelector('i');
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.replace('fa-eye', 'fa-eye-slash');
+                    icon.classList.add('text-emerald-500');
+                } else {
+                    input.type = 'password';
+                    icon.classList.replace('fa-eye-slash', 'fa-eye');
+                    icon.classList.remove('text-emerald-500');
+                }
+            });
+        });
+
+        // --- 2. AUTHENTICATION & STATE MANAGEMENT ---
+        async function checkAccessState() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                currentUser = null;
+                showView('auth');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/me`, { headers: getAuthHeaders() });
+                if (!res.ok) throw new Error("Invalid token");
+                
+                const profile = await res.json();
+                currentUser = { email: profile.email };
+                userProfile = { full_name: profile.name, phone_number: profile.phone };
+                
+                const navEmail = document.getElementById('nav-user-email');
+                if (navEmail) navEmail.textContent = currentUser.email;
+
+                isUserPaid = profile.is_paid;
+                completedLessons = new Set(profile.completed_lessons || []);
+                personalBest = profile.personal_best ? parseFloat(profile.personal_best) * 1000 : null;
+
+                if (isUserPaid) {
+                    showView('app');
+                    updateProgressUI();
+                    if (personalBest) document.getElementById('pb-display').textContent = formatTime(personalBest);
+                } else {
+                    showView('home');
+                }
+            } catch (err) {
+                console.error(err);
+                localStorage.removeItem('token');
+                currentUser = null;
+                showView('auth');
+            }
+        }
+
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const btn = document.getElementById('btn-login-submit');
+            
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Signing in...';
+            btn.disabled = true;
+            
+            try {
+                const res = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    localStorage.setItem('token', data.token);
+                    authAlert.classList.add('hidden');
+                    await checkAccessState();
+                } else {
+                    showAuthAlert(data.error);
+                }
+            } catch (err) {
+                showAuthAlert("Server connection error.");
+            } finally {
+                btn.innerHTML = '<span>Sign In to Class</span>';
+                btn.disabled = false;
+            }
+        });
+
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('register-name').value;
+            const phoneDigits = document.getElementById('register-phone').value;
+            const fullPhone = '+91' + phoneDigits;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const btn = document.getElementById('btn-register-submit');
+
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Creating...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`${API_URL}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, phone: fullPhone, email, password })
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    localStorage.setItem('token', data.token);
+                    showAuthAlert("Account created successfully!", true);
+                    document.getElementById('register-form').reset();
+                    setTimeout(() => checkAccessState(), 1000);
+                } else {
+                    showAuthAlert(data.error);
+                }
+            } catch (err) {
+                showAuthAlert("Server connection error.");
+            } finally {
+                btn.innerHTML = '<span>Create Account</span>';
+                btn.disabled = false;
+            }
+        });
+
+        document.getElementById('btn-logout').addEventListener('click', async () => {
+            localStorage.removeItem('token');
+            checkAccessState();
+        });
+
+        // --- RAZORPAY & PROMO CODE INTEGRATION ---
+        async function grantCourseAccess() {
+            if (!currentUser) return;
+            try {
+                const res = await fetch(`${API_URL}/unlock`, { method: 'POST', headers: getAuthHeaders() });
+                if (res.ok) await checkAccessState();
+            } catch(error) {
+                alert("Error unlocking course");
+            }
+        }
+
+        document.getElementById('btn-unlock-course').addEventListener('click', () => {
+            if (!currentUser) {
+                showAuthAlert("Please log in or create an account first.");
+                showView('auth');
+                return;
+            }
+
+            const options = {
+                "key": "rzp_live_TcbHnUwdFzjT5l",
+                "amount": 30000, // ₹300.00 in paise
+                "currency": "INR",
+                "name": "CubeMastery Pro",
+                "description": "7-Day Access Pass",
+                "image": "https://images.unsplash.com/photo-1591991731833-b4807cf7ef94?w=150",
+                "handler": async function (response) {
+                    await grantCourseAccess();
+                },
+                "prefill": {
+                    "name": (userProfile && userProfile.full_name) || "Student",
+                    "email": currentUser.email,
+                    "contact": (userProfile && userProfile.phone_number) || ""
+                },
+                "theme": {
+                    "color": "#10b981"
+                }
+            };
+            const rzp = new Razorpay(options);
+            rzp.open();
+        });
+
+        // Promo Code Handler
+        document.getElementById('btn-apply-promo').addEventListener('click', async () => {
+            const promoInput = document.getElementById('promo-input').value.trim().toLowerCase();
+            const promoMsg = document.getElementById('promo-msg');
+            promoMsg.classList.remove('hidden');
+
+            if (promoInput === 'testfree') {
+                promoMsg.textContent = "Promo applied successfully! Unlocking...";
+                promoMsg.className = "text-xs mt-2 font-semibold text-emerald-400";
+                await grantCourseAccess();
+            } else {
+                promoMsg.textContent = "Invalid promo code.";
+                promoMsg.className = "text-xs mt-2 font-semibold text-rose-400";
+            }
+        });
+
+        // Initialize state on load
+        window.addEventListener('DOMContentLoaded', async () => {
+            checkAccessState();
+        });
+
+        // --- UI ROUTING ---
+        function showView(viewName) {
+            Object.values(views).forEach(v => v.classList.add('hidden'));
+            views[viewName].classList.remove('hidden');
+            
+            if(viewName === 'lesson' && !cubeInitialized) {
+                init3DCube();
+                cubeInitialized = true;
+            } else if (viewName === 'lesson') {
+                window.dispatchEvent(new Event('resize')); 
+            }
+        }
+
+        const tabs = { login: document.getElementById('tab-login'), register: document.getElementById('tab-register') };
+        const forms = { login: document.getElementById('login-form'), register: document.getElementById('register-form') };
+        
+        function switchAuthTab(target) {
+            if (target === 'register') {
+                tabs.register.classList.remove('text-slate-500', 'border-transparent');
+                tabs.register.classList.add('text-emerald-500', 'border-emerald-500');
+                tabs.login.classList.remove('text-emerald-500', 'border-emerald-500');
+                tabs.login.classList.add('text-slate-500', 'border-transparent');
+                forms.register.classList.remove('hidden');
+                forms.login.classList.add('hidden');
+            } else {
+                tabs.login.classList.remove('text-slate-500', 'border-transparent');
+                tabs.login.classList.add('text-emerald-500', 'border-emerald-500');
+                tabs.register.classList.remove('text-emerald-500', 'border-emerald-500');
+                tabs.register.classList.add('text-slate-500', 'border-transparent');
+                forms.login.classList.remove('hidden');
+                forms.register.classList.add('hidden');
+            }
+            authAlert.classList.add('hidden');
+        }
+
+        tabs.login.addEventListener('click', () => switchAuthTab('login'));
+        tabs.register.addEventListener('click', () => switchAuthTab('register'));
+
+        // --- CURRICULUM DATA ---
+        const lessonContent = {
+            "0": {
+                title: "Basic Notations",
+                desc: "Learn how to read cube algorithms with White top and Yellow bottom. Every letter represents a 90° clockwise turn of that face. An apostrophe (') means counter-clockwise, and a '2' means a 180° double-turn.",
+                algs: [
+                    { name: "Right Face (R / R')", notation: "R R'", note: "R = Turn right face clockwise 90°. R' = Turn counter-clockwise." },
+                    { name: "Left Face (L / L')", notation: "L L'", note: "L = Turn left face clockwise 90°. L' = Turn counter-clockwise." },
+                    { name: "Up Face (U / U')", notation: "U U'", note: "U = Turn top face clockwise 90°. U' = Turn counter-clockwise." },
+                    { name: "Down Face (D / D')", notation: "D D'", note: "D = Turn bottom face clockwise 90°. D' = Turn counter-clockwise." },
+                    { name: "Front Face (F / F')", notation: "F F'", note: "F = Turn front face clockwise 90°. F' = Turn counter-clockwise." },
+                    { name: "Back Face (B / B')", notation: "B B'", note: "B = Turn back face clockwise 90°. B' = Turn counter-clockwise." }
+                ]
+            },
+            "1": { 
+                title: "The White Cross", 
+                desc: "Find white edge pieces and align them around the white center piece on top. Make sure side colors match adjacent centers.", 
+                algs: [{ name: "Intuitive Cross", notation: "", note: "Solve this intuitively with White on top and Yellow on bottom!" }] 
+            },
+            "2": { 
+                title: "First Layer Corners (Hide & Seek)", 
+                desc: "Insert white corners into the bottom layer with White on Top using the Hide & Seek formulas for both right and left placements.", 
+                algs: [
+                    { name: "Hide & Seek (Right Side)", notation: "d' r' d r", note: "Hides the corner away (d'), brings right side down (r'), brings corner back (d), and lifts right side up (r)." },
+                    { name: "Hide & Seek (Left Side - Mirrored)", notation: "d l d' l'", note: "Mirrored sequence for inserting corners on the left side." }
+                ] 
+            },
+            "3": { 
+                title: "Second Layer Edges", 
+                desc: "Place middle layer edges correctly using the insertion formulas for right and left orientations.", 
+                algs: [
+                    { name: "Edge Insertion (Right Side)", notation: "d' r' d r d f d' f'", note: "Positions and inserts middle layer edge pieces on the right." },
+                    { name: "Edge Insertion (Left Side - Mirrored)", notation: "d l d' l' d' f' d f", note: "Positions and inserts middle layer edge pieces on the left." }
+                ] 
+            },
+            "4": { 
+                title: "Yellow Cross", 
+                desc: "Form the yellow cross on the bottom face using the J Formula with White on top and Yellow on bottom.", 
+                algs: [{ name: "J Formula", notation: "R' D' B' D B R", note: "Execute with White on top and Yellow on bottom." }] 
+            },
+            "5": { 
+                title: "Yellow Centers", 
+                desc: "Position top/bottom edge pieces correctly using the Corner Formula.", 
+                algs: [{ name: "Corner Formula", notation: "r' d' r d' r' d2 r", note: "Cycles corner pieces into correct positions with White on top." }] 
+            },
+            "6": { 
+                title: "Finish the Cube", 
+                desc: "Position and orient final corners to finish the solve using the 11 Formula.", 
+                algs: [{ name: "11 Formula", notation: "r' d l d' r d l'", note: "Final permutation sequence with White on top." }] 
+            }
+        };
+        const totalLessons = Object.keys(lessonContent).length;
+
+        // --- DASHBOARD AND PROGRESS ---
+        async function updateProgressUI() {
+            const percentage = Math.round((completedLessons.size / totalLessons) * 100);
+            document.getElementById('progress-text').textContent = `${percentage}% Completed`;
+            document.getElementById('progress-bar').style.width = `${percentage}%`;
+            
+            if (percentage === 100) {
+                document.getElementById('progress-icon').classList.replace('text-slate-700', 'text-emerald-400');
+                document.getElementById('progress-icon').classList.add('drop-shadow-[0_0_10px_rgba(16,185,129,0.8)]');
+                document.getElementById('btn-certificate').classList.remove('hidden');
+            }
+            renderDashboard();
+
+            if (currentUser) {
+                fetch(`${API_URL}/progress`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ completed_lessons: Array.from(completedLessons) })
+                });
+            }
+        }
+
+        function renderDashboard() {
+            const container = document.getElementById('lessons-container');
+            container.innerHTML = '';
+            
+            Object.keys(lessonContent).forEach(key => {
+                const lesson = lessonContent[key];
+                const isComplete = completedLessons.has(key);
+                const borderClass = isComplete ? 'border-emerald-500/50' : 'border-slate-800';
+                
+                container.innerHTML += `
+                    <div class="bg-slate-900 rounded-2xl p-6 border ${borderClass} card-edge-${key} shadow-xl relative overflow-hidden flex flex-col min-h-[260px]">
+                        ${isComplete ? '<div class="absolute top-5 right-5 text-emerald-500"><i class="fa-solid fa-circle-check text-xl"></i></div>' : ''}
+                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Step ${key}</h4>
+                        <p class="text-xl font-extrabold text-white mb-3">${lesson.title}</p>
+                        <p class="text-sm text-slate-300 mb-6 flex-1 leading-relaxed">${lesson.desc}</p>
+                        <button class="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-sm font-bold transition-colors btn-view-lesson shadow" data-lesson="${key}">
+                            ${isComplete ? 'Review Lesson' : 'Start Lesson'}
+                        </button>
+                    </div>
+                `;
+            });
+
+            document.querySelectorAll('.btn-view-lesson').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    currentLessonId = e.currentTarget.getAttribute('data-lesson');
+                    const content = lessonContent[currentLessonId];
+                    
+                    document.getElementById('lesson-title').textContent = `Step ${currentLessonId}: ${content.title}`;
+                    document.getElementById('alg-title').textContent = content.title;
+                    document.getElementById('alg-desc').textContent = content.desc;
+                    
+                    const algList = document.getElementById('alg-list');
+                    algList.innerHTML = '';
+                    content.algs.forEach(alg => {
+                        const hasAlg = alg.notation.trim() !== "";
+                        algList.innerHTML += `
+                            <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
+                                <h5 class="font-bold text-white mb-2">${alg.name}</h5>
+                                ${hasAlg ? `<div class="bg-slate-950 text-emerald-400 font-mono text-lg font-bold py-3 px-4 rounded-lg tracking-widest text-center shadow-inner border border-slate-800 mb-3">${alg.notation}</div>` : ''}
+                                <p class="text-xs text-slate-400 italic mb-3"><i class="fa-solid fa-circle-info mr-1"></i>${alg.note}</p>
+                                ${hasAlg ? `<button class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-bold transition-colors btn-play-alg flex items-center justify-center gap-2" data-alg="${alg.notation}"><i class="fa-solid fa-play"></i> Play Move</button>` : ''}
+                            </div>
+                        `;
+                    });
+
+                    const completeBtn = document.getElementById('btn-mark-complete');
+                    if (completedLessons.has(currentLessonId)) {
+                        completeBtn.classList.replace('bg-slate-800', 'bg-emerald-600');
+                    } else {
+                        completeBtn.classList.replace('bg-emerald-600', 'bg-slate-800');
+                    }
+
+                    bindPlayButtons();
+                    showView('lesson');
+                });
+            });
+        }
+
+        document.getElementById('btn-mark-complete').addEventListener('click', () => {
+            if (currentLessonId) {
+                if (completedLessons.has(currentLessonId)) {
+                    completedLessons.delete(currentLessonId);
+                } else {
+                    completedLessons.add(currentLessonId);
+                    fireConfetti();
+                }
+                updateProgressUI();
+                
+                const completeBtn = document.getElementById('btn-mark-complete');
+                if (completedLessons.has(currentLessonId)) {
+                    completeBtn.classList.replace('bg-slate-800', 'bg-emerald-600');
+                } else {
+                    completeBtn.classList.replace('bg-emerald-600', 'bg-slate-800');
+                }
+            }
+        });
+
+        document.getElementById('btn-back-dashboard').addEventListener('click', () => showView('app'));
+
+        // --- SOUND & ANIMATION EFFECTS ---
+        function initAudio() {
+            if (!cubeSynth) {
+                cubeSynth = new Tone.PolySynth(Tone.Synth).toDestination();
+                cubeSynth.set({
+                    oscillator: { type: "square" },
+                    envelope: { attack: 0.005, decay: 0.05, sustain: 0, release: 0.05 },
+                    volume: -15
+                });
+            }
+            if (Tone.context.state !== 'running') Tone.context.resume();
+        }
+
+        function playSnapSound() {
+            if (cubeSynth && Tone.context.state === 'running') {
+                cubeSynth.triggerAttackRelease("G2", "64n");
+            }
+        }
+
+        function fireConfetti() {
+            var duration = 3000;
+            var animationEnd = Date.now() + duration;
+            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 100 };
+            function randomInRange(min, max) { return Math.random() * (max - min) + min; }
+            var interval = setInterval(function() {
+                var timeLeft = animationEnd - Date.now();
+                if (timeLeft <= 0) return clearInterval(interval);
+                var particleCount = 50 * (timeLeft / duration);
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+            }, 250);
+        }
+
+        // --- TIMER & PB DATABASE LOGIC ---
+        function formatTime(ms) { return (ms / 1000).toFixed(2); }
+
+        function updateTimer() {
+            if (timerState === 'running') {
+                const elapsed = Date.now() - timerStart;
+                timerDisplay.textContent = formatTime(elapsed);
+                timerInterval = requestAnimationFrame(updateTimer);
+            }
+        }
+
+        async function handleTimerDown() {
+            initAudio();
+            if (timerState === 'idle' || timerState === 'stopped') {
+                timerState = 'ready';
+                timerDisplay.classList.replace('text-white/30', 'text-emerald-400');
+                timerDisplay.textContent = '0.00';
+                timerInstruction.classList.add('opacity-0');
+            } else if (timerState === 'running') {
+                timerState = 'stopped';
+                cancelAnimationFrame(timerInterval);
+                const elapsed = Date.now() - timerStart;
+
+                if (checkWinCondition() && isScrambledState) {
+                    if (!personalBest || elapsed < personalBest) {
+                        personalBest = elapsed;
+                        document.getElementById('pb-display').textContent = formatTime(personalBest);
+                        timerDisplay.classList.replace('text-emerald-400', 'text-emerald-300');
+                        timerInstruction.textContent = "NEW PERSONAL BEST! 🎉";
+                        timerInstruction.classList.remove('opacity-0');
+                        timerInstruction.classList.replace('text-slate-500', 'text-emerald-400');
+                        fireConfetti();
+                        setTimeout(fireConfetti, 500);
+
+                        if (currentUser) {
+                            fetch(`${API_URL}/pb`, {
+                                method: 'POST',
+                                headers: getAuthHeaders(),
+                                body: JSON.stringify({ personal_best: personalBest / 1000 })
+                            });
+                        }
+
+                    } else {
+                        timerDisplay.classList.replace('text-emerald-400', 'text-white');
+                        timerInstruction.textContent = "Solved!";
+                        timerInstruction.classList.remove('opacity-0');
+                    }
+                    isScrambledState = false;
+                } else {
+                    timerDisplay.classList.replace('text-emerald-400', 'text-rose-500');
+                    setTimeout(() => {
+                        if (timerState === 'stopped') {
+                            timerDisplay.classList.replace('text-rose-500', 'text-white/30');
+                            timerInstruction.textContent = "Spacebar / Tap to start timer";
+                            timerInstruction.classList.replace('text-emerald-400', 'text-slate-500');
+                            timerInstruction.classList.remove('opacity-0');
+                        }
+                    }, 2000);
+                }
+            }
+        }
+
+        function handleTimerUp() {
+            if (timerState === 'ready') {
+                timerState = 'running';
+                timerStart = Date.now();
+                timerDisplay.classList.replace('text-emerald-400', 'text-white');
+                timerInterval = requestAnimationFrame(updateTimer);
+            }
+        }
+
+        document.addEventListener('keydown', (e) => { if (e.code === 'Space' && views.lesson.classList.contains('hidden') === false) handleTimerDown(); });
+        document.addEventListener('keyup', (e) => { if (e.code === 'Space' && views.lesson.classList.contains('hidden') === false) handleTimerUp(); });
+        timerDisplay.addEventListener('pointerdown', handleTimerDown);
+        timerDisplay.addEventListener('pointerup', handleTimerUp);
+
+        // --- 3D ENGINE ---
+        function init3DCube() {
+            const container = document.getElementById('cube-container');
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+            
+            camera.position.set(4, 4, 7);
+            camera.up.set(0, 1, 0);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            controls = new THREE.TrackballControls(camera, renderer.domElement);
+            controls.rotateSpeed = 4.0;
+            controls.noZoom = true;
+            controls.noPan = true;
+            controls.dynamicDampingFactor = 0.15;
+
+            scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+            const mainLight = new THREE.DirectionalLight(0xffffff, 0.5);
+            mainLight.position.set(10, 20, 15);
+            scene.add(mainLight);
+
+            createRubiksCube();
+            setupInteraction(container);
+
+            window.addEventListener('resize', () => {
+                if(!container.clientWidth) return;
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+                controls.handleResize();
+            });
+
+            animate();
+        }
+
+        function createRubiksCube() {
+            if (cubeGroup) scene.remove(cubeGroup);
+            cubeGroup = new THREE.Group();
+            
+            const colors = [0xB71234, 0xFF5800, 0xFFFFFF, 0xFFD500, 0x009B48, 0x0046AD];
+            const boxGeo = new THREE.BoxGeometry(0.96, 0.96, 0.96); 
+            const blackMat = new THREE.MeshPhysicalMaterial({ color: 0x111111, roughness: 1.0 });
+            const stickerGeo = new THREE.PlaneGeometry(0.85, 0.85);
+
+            for (let x = -1; x <= 1; x++) {
+                for (let y = -1; y <= 1; y++) {
+                    for (let z = -1; z <= 1; z++) {
+                        const piece = new THREE.Group();
+                        piece.add(new THREE.Mesh(boxGeo, blackMat));
+
+                        for(let i=0; i<6; i++) {
+                            let isOutside = false;
+                            if (i===0 && x===1) isOutside = true;
+                            if (i===1 && x===-1) isOutside = true;
+                            if (i===2 && y===1) isOutside = true;
+                            if (i===3 && y===-1) isOutside = true;
+                            if (i===4 && z===1) isOutside = true;
+                            if (i===5 && z===-1) isOutside = true;
+
+                            if (isOutside) {
+                                const stickerMat = new THREE.MeshBasicMaterial({ color: colors[i] });
+                                const sticker = new THREE.Mesh(stickerGeo, stickerMat);
+                                sticker.userData = { isSticker: true, color: colors[i] };
+                                
+                                const offset = 0.485; 
+                                if (i===0) { sticker.position.x = offset; sticker.rotation.y = Math.PI/2; }
+                                if (i===1) { sticker.position.x = -offset; sticker.rotation.y = -Math.PI/2; }
+                                if (i===2) { sticker.position.y = offset; sticker.rotation.x = -Math.PI/2; }
+                                if (i===3) { sticker.position.y = -offset; sticker.rotation.x = Math.PI/2; }
+                                if (i===4) { sticker.position.z = offset; }
+                                if (i===5) { sticker.position.z = -offset; sticker.rotation.y = Math.PI; }
+                                piece.add(sticker);
+                            }
+                        }
+                        piece.position.set(x * spacing, y * spacing, z * spacing);
+                        piece.userData = { isCubelet: true, startPos: piece.position.clone() };
+                        cubeGroup.add(piece);
+                    }
+                }
+            }
+            scene.add(cubeGroup);
+        }
+
+        function rotateLayer(axisStr, layerValue, direction, duration = SNAP_SPEED) {
+            return new Promise((resolve) => {
+                if (isAnimating) return resolve();
+                isAnimating = true;
+
+                const activePieces = [];
+                cubeGroup.children.forEach(cubelet => {
+                    if (cubelet.userData.isCubelet && Math.abs(cubelet.position[axisStr] - (layerValue * spacing)) < 0.1) {
+                        activePieces.push(cubelet);
+                    }
+                });
+
+                if (activePieces.length === 0) {
+                    isAnimating = false;
+                    return resolve();
+                }
+
+                const pivot = new THREE.Group();
+                pivot.rotation.set(0, 0, 0); 
+                scene.add(pivot);
+                
+                activePieces.forEach(p => pivot.attach(p));
+
+                const targetAngle = (Math.PI / 2) * direction;
+                const axisVec = new THREE.Vector3();
+                axisVec[axisStr] = 1;
+
+                let startTime = null;
+                function animateTurn(time) {
+                    if (!startTime) startTime = time;
+                    const progress = Math.min((time - startTime) / duration, 1);
+                    const ease = -(Math.cos(Math.PI * progress) - 1) / 2;
+                    
+                    pivot.setRotationFromAxisAngle(axisVec, targetAngle * ease);
+
+                    if (progress < 1) {
+                        requestAnimationFrame(animateTurn);
+                    } else {
+                        pivot.setRotationFromAxisAngle(axisVec, targetAngle);
+                        pivot.updateMatrixWorld();
+                        
+                        activePieces.forEach(p => {
+                            cubeGroup.attach(p);
+                            p.position.x = Math.round(p.position.x / spacing) * spacing;
+                            p.position.y = Math.round(p.position.y / spacing) * spacing;
+                            p.position.z = Math.round(p.position.z / spacing) * spacing;
+                            
+                            const euler = new THREE.Euler().setFromQuaternion(p.quaternion);
+                            euler.x = Math.round(euler.x / (Math.PI/2)) * (Math.PI/2);
+                            euler.y = Math.round(euler.y / (Math.PI/2)) * (Math.PI/2);
+                            euler.z = Math.round(euler.z / (Math.PI/2)) * (Math.PI/2);
+                            p.quaternion.setFromEuler(euler);
+                        });
+                        
+                        scene.remove(pivot);
+                        isAnimating = false;
+                        if (typeof playSnapSound === "function") playSnapSound();
+                        resolve();
+                    }
+                }
+                requestAnimationFrame(animateTurn);
+            });
+        }
+
+        function setupInteraction(container) {
+            let raycaster = new THREE.Raycaster();
+            let mouse = new THREE.Vector2();
+            
+            let dragState = {
+                active: false,
+                piece: null,
+                normal: null,
+                startMouse: new THREE.Vector2()
+            };
+
+            container.addEventListener('pointerdown', (e) => {
+                if (typeof initAudio === "function") initAudio();
+                if (isAnimating || isPlayingAlg) return;
+                
+                const rect = container.getBoundingClientRect();
+                mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+                mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+                raycaster.setFromCamera(mouse, camera);
+                const intersects = raycaster.intersectObjects(cubeGroup.children, true);
+                const hit = intersects.find(obj => obj.object.userData && obj.object.userData.isSticker);
+
+                if (hit) {
+                    e.stopPropagation();
+                    if (controls) controls.enabled = false; 
+                    
+                    dragState.active = true;
+                    dragState.startMouse.set(e.clientX, e.clientY);
+                    
+                    const normalMatrix = new THREE.Matrix3().getNormalMatrix(hit.object.matrixWorld);
+                    dragState.normal = hit.face.normal.clone().applyMatrix3(normalMatrix).normalize();
+                    dragState.normal.x = Math.round(dragState.normal.x);
+                    dragState.normal.y = Math.round(dragState.normal.y);
+                    dragState.normal.z = Math.round(dragState.normal.z);
+                    
+                    dragState.piece = hit.object.parent;
+                    container.style.cursor = 'grabbing';
+                }
+            }, { capture: true });
+
+            window.addEventListener('pointermove', (e) => {
+                if (!dragState.active || !dragState.piece || isAnimating) return;
+                
+                const dx = e.clientX - dragState.startMouse.x;
+                const dy = e.clientY - dragState.startMouse.y;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+
+                if (dist > DRAG_SENSITIVITY) {
+                    let bestAxis = null, maxDot = 0, direction = 1;
+                    
+                    ['x', 'y', 'z'].forEach(axis => {
+                        if (Math.abs(dragState.normal[axis]) < 0.5) { 
+                            const axisVec = new THREE.Vector3(); axisVec[axis] = 1;
+                            const moveDir = new THREE.Vector3().crossVectors(axisVec, dragState.normal).normalize();
+                            const centerPt = dragState.piece.position.clone().project(camera);
+                            const movePt = dragState.piece.position.clone().add(moveDir).project(camera);
+                            
+                            const screenMove = new THREE.Vector2(movePt.x - centerPt.x, -(movePt.y - centerPt.y)).normalize();
+                            const swipeVec = new THREE.Vector2(dx, dy).normalize();
+                            const dot = swipeVec.dot(screenMove);
+                            
+                            if (Math.abs(dot) > maxDot) {
+                                maxDot = Math.abs(dot); bestAxis = axis; direction = Math.sign(dot);
+                            }
+                        }
+                    });
+
+                    if (bestAxis) {
+                        const layerValue = Math.round(dragState.piece.position[bestAxis] / spacing);
+                        dragState.active = false;
+                        dragState.piece = null;
+                        container.style.cursor = 'grab';
+                        
+                        rotateLayer(bestAxis, layerValue, direction, SNAP_SPEED).then(() => {
+                            if (isScrambledState && typeof checkWinCondition === "function" && checkWinCondition()) {
+                                if (typeof fireConfetti === "function") fireConfetti(); 
+                                isScrambledState = false;
+                            }
+                        });
+                    }
+                }
+            });
+
+            window.addEventListener('pointerup', () => {
+                if (dragState.active) {
+                    dragState.active = false;
+                    dragState.piece = null;
+                    container.style.cursor = 'grab';
+                }
+                if (controls) controls.enabled = true;
+            });
+        }
+
+        const moveMap = {
+            "u":  { axis: 'y', layer: 1, dir: -1 }, "u'": { axis: 'y', layer: 1, dir: 1 },
+            "d":  { axis: 'y', layer: -1, dir: 1 }, "d'": { axis: 'y', layer: -1, dir: -1 },
+            "r":  { axis: 'x', layer: 1, dir: -1 }, "r'": { axis: 'x', layer: 1, dir: 1 },
+            "l":  { axis: 'x', layer: -1, dir: 1 }, "l'": { axis: 'x', layer: -1, dir: -1 },
+            "f":  { axis: 'z', layer: 1, dir: -1 }, "f'": { axis: 'z', layer: 1, dir: 1 },
+            "b":  { axis: 'z', layer: -1, dir: 1 }, "b'": { axis: 'z', layer: -1, dir: -1 },
+            "R":  { axis: 'x', layer: 1, dir: -1 }, "R'": { axis: 'x', layer: 1, dir: 1 },
+            "L":  { axis: 'x', layer: -1, dir: 1 }, "L'": { axis: 'x', layer: -1, dir: -1 },
+            "U":  { axis: 'y', layer: 1, dir: -1 }, "U'": { axis: 'y', layer: 1, dir: 1 },
+            "D":  { axis: 'y', layer: -1, dir: 1 }, "D'": { axis: 'y', layer: -1, dir: -1 },
+            "F":  { axis: 'z', layer: 1, dir: -1 }, "F'": { axis: 'z', layer: 1, dir: 1 },
+            "B":  { axis: 'z', layer: -1, dir: 1 }, "B'": { axis: 'z', layer: -1, dir: -1 }
+        };
+
+        async function playAlgorithm(algString) {
+            if (isAnimating || isPlayingAlg || !cubeGroup) return;
+            isPlayingAlg = true;
+            initAudio();
+
+            camera.position.set(4, 4, 7);
+            camera.up.set(0, 1, 0);
+            controls.target.set(0, 0, 0);
+            controls.update();
+
+            const moves = algString.split(' ');
+            const parsedMoves = [];
+
+            const speedEl = document.getElementById('playback-speed');
+            const speedMultiplier = speedEl ? parseFloat(speedEl.value) : 1.0;
+            const moveDuration = SNAP_SPEED * speedMultiplier;
+            const pauseDuration = 60 * speedMultiplier;
+
+            for (let m of moves) {
+                if (m.includes('2')) {
+                    const base = m.replace('2', '');
+                    parsedMoves.push(base, base);
+                } else {
+                    parsedMoves.push(m);
+                }
+            }
+
+            for (let move of parsedMoves) {
+                const mData = moveMap[move];
+                if (mData) {
+                    await rotateLayer(mData.axis, mData.layer, mData.dir, moveDuration); 
+                    await new Promise(r => setTimeout(r, pauseDuration)); 
+                }
+            }
+            isPlayingAlg = false;
+        }
+
+        function bindPlayButtons() {
+            document.querySelectorAll('.btn-play-alg').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const alg = e.currentTarget.getAttribute('data-alg');
+                    playAlgorithm(alg);
+                });
+            });
+        }
+
+        function checkWinCondition() {
+            if (!cubeGroup) return false;
+            const faceColors = { '1,0,0': new Set(), '-1,0,0': new Set(), '0,1,0': new Set(), '0,-1,0': new Set(), '0,0,1': new Set(), '0,0,-1': new Set() };
+            cubeGroup.updateMatrixWorld(true);
+
+            cubeGroup.children.forEach(piece => {
+                if (!piece.userData.isCubelet) return;
+                piece.children.forEach(child => {
+                    if (child.userData.isSticker) {
+                        const normalMatrix = new THREE.Matrix3().getNormalMatrix(child.matrixWorld);
+                        const worldNormal = new THREE.Vector3(0, 0, 1).applyMatrix3(normalMatrix).normalize();
+                        const key = `${Math.round(worldNormal.x)},${Math.round(worldNormal.y)},${Math.round(worldNormal.z)}`;
+                        if (faceColors[key]) faceColors[key].add(child.userData.color);
+                    }
+                });
+            });
+
+            for (const key in faceColors) { if (faceColors[key].size !== 1) return false; }
+            return true;
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if (controls) controls.update(); 
+            if (renderer && scene && camera) renderer.render(scene, camera);
+        }
+
+        async function scrambleCube() {
+            if (isAnimating || isPlayingAlg || !cubeGroup) return;
+            isScrambledState = false; 
+
+            const possibleMoves = ["R", "R'", "L", "L'", "U", "U'", "D", "D'", "F", "F'", "B", "B'"];
+            const scrambleSequence = [];
+            let lastAxis = "";
+
+            for (let i = 0; i < 20; i++) {
+                let randomMove = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
+                while (randomMove[0].toLowerCase() === lastAxis) {
+                    randomMove = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
+                }
+                lastAxis = randomMove[0].toLowerCase();
+                scrambleSequence.push(randomMove);
+            }
+
+            const scrambleStr = scrambleSequence.join(" ");
+            document.getElementById('scramble-text').textContent = scrambleStr;
+
+            for(let m of scrambleSequence) {
+                const mData = moveMap[m];
+                if (mData) {
+                    await rotateLayer(mData.axis, mData.layer, mData.dir, 400);
+                    await new Promise(r => setTimeout(r, 80));
+                }
+            }
+            isScrambledState = true; 
+        }
+
+        document.getElementById('btn-reset-cube').addEventListener('click', () => { 
+            if(!isAnimating && !isPlayingAlg) {
+                createRubiksCube();
+                document.getElementById('scramble-text').textContent = "Cube Reset";
+            }
+        });
+        document.getElementById('btn-scramble').addEventListener('click', scrambleCube);
+
+    </script>
+</body>
+</html>
